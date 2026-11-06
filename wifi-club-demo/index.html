@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Shared Wi-Fi club - working demo (synthetic data)</title>
+<style>
+  :root { --sand:#f4efec; --ink:#251f21; --ink2:#585254; --line:#eae9ea; --teal:#73a89a; --red:#ed313e; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--sand); color:var(--ink); font:350 15px/24px -apple-system, "Helvetica Neue", Arial, sans-serif; letter-spacing:-0.01em; }
+  .page { max-width:640px; margin:0 auto; background:#fff; min-height:100vh; padding:28px 20px 48px; }
+  h1 { font-family:Georgia, "Times New Roman", serif; font-weight:400; font-size:28px; line-height:34px; letter-spacing:-0.025em; margin:0 0 8px; }
+  h2 { font-family:Georgia, "Times New Roman", serif; font-weight:400; font-size:21px; letter-spacing:-0.025em; margin:36px 0 12px; }
+  .fact-tag { color:var(--ink2); font-size:13px; margin:0 0 12px; }
+  .intro { margin:0 0 8px; }
+  .label { color:var(--ink2); font-size:13px; margin:28px 0 10px; }
+  ol.steps { margin:0; padding:0; list-style:none; }
+  ol.steps li { display:flex; gap:14px; padding:10px 0; border-top:1px solid var(--line); }
+  ol.steps li span.n { color:var(--ink2); min-width:16px; }
+  .switchrow { display:flex; align-items:center; gap:12px; min-height:44px; }
+  .switch { width:52px; height:32px; border-radius:16px; border:1px solid var(--line); background:var(--sand); position:relative; cursor:pointer; padding:0; flex:none; }
+  .thumb { position:absolute; top:3px; left:3px; width:24px; height:24px; border-radius:50%; background:#fff; box-shadow:0 1px 3px rgba(0,0,0,.2); transition:left .15s ease; }
+  .switch.on { background:var(--teal); border-color:var(--teal); }
+  .switch.on .thumb { left:23px; }
+  .caption { color:var(--ink2); font-size:12px; line-height:18px; margin-top:8px; }
+  .facts { border-top:1px solid var(--line); }
+  .frow { display:flex; gap:16px; padding:10px 0; border-bottom:1px solid var(--line); }
+  .frow .fl { color:var(--ink2); font-size:13px; flex:0 0 34%; }
+  .frow .fv { flex:1; }
+  .venue { border:1px solid var(--line); border-radius:12px; padding:16px; margin:0 0 14px; }
+  .vtop { display:flex; justify-content:space-between; align-items:flex-start; gap:12px; }
+  .vname { font-weight:600; }
+  .vmeta { color:var(--ink2); font-size:12px; line-height:18px; }
+  .score { font-weight:600; white-space:nowrap; text-align:right; }
+  .score small { font-weight:350; color:var(--ink2); }
+  .score.good { color:var(--teal); } .score.mid { color:var(--ink); } .score.low { color:var(--red); }
+  .cred { display:flex; gap:12px; align-items:baseline; margin-top:6px; }
+  .cred .cl { color:var(--ink2); font-size:12px; min-width:68px; }
+  .cred .cv { font-weight:600; overflow-wrap:anywhere; }
+  .cred .cn { color:var(--ink2); font-size:12px; margin-left:auto; white-space:nowrap; }
+  .vnote { color:var(--ink2); font-size:12px; line-height:18px; border-left:2px solid var(--line); padding-left:8px; margin-top:8px; }
+  .btnrow { display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; }
+  button.act { min-height:44px; padding:0 16px; border-radius:4px; border:1px solid var(--ink); background:var(--ink); color:#fff; font:inherit; cursor:pointer; }
+  button.act.sec { background:#fff; color:var(--ink); border:1px solid var(--line); }
+  button.act:disabled { opacity:.4; cursor:default; }
+  .sim { border-left:2px solid var(--teal); padding-left:10px; margin-top:10px; font-size:14px; line-height:22px; }
+  .status { color:var(--ink2); font-size:12px; margin-top:6px; }
+  form.contrib { display:flex; flex-direction:column; gap:12px; }
+  form.contrib label { display:flex; flex-direction:column; gap:4px; font-size:12px; color:var(--ink2); }
+  form.contrib input { min-height:44px; padding:8px 12px; border:1px solid var(--line); border-radius:4px; font:inherit; color:var(--ink); }
+  form.contrib button { align-self:flex-start; }
+  .qitem { display:flex; justify-content:space-between; align-items:center; gap:12px; border:1px solid var(--line); border-radius:8px; padding:10px 12px; margin-top:8px; }
+  .chip { font-size:12px; color:var(--ink2); border:1px solid var(--line); border-radius:999px; padding:2px 10px; white-space:nowrap; }
+  .callout { background:var(--sand); border-radius:12px; padding:14px 16px; margin-top:14px; font-size:14px; line-height:22px; }
+  .callout b { display:block; margin-bottom:2px; }
+  .closing { color:var(--ink2); font-size:12px; margin-top:36px; }
+</style>
+</head>
+<body>
+<div class="page">
+  <h1>A members' club for working guest Wi-Fi</h1>
+  <p class="fact-tag">Working prototype · synthetic data only</p>
+  <p class="intro">A small membership - about HK$10 a month, proposed, nothing charged - for convenience and reliability: find an authorised guest network, connect with less hassle, and know it worked recently. The venue's free Wi-Fi stays the venue's; members pay for the club, never for the Wi-Fi itself.</p>
+
+  <h2>How it works</h2>
+  <ol class="steps">
+    <li><span class="n">1</span><span>Find a venue nearby in the app. Anyone can see scores and network names.</span></li>
+    <li><span class="n">2</span><span>Members tap Connect - the app asks iOS to join the saved network. iOS may ask you to approve first, and the phone itself does the connecting.</span></li>
+    <li><span class="n">3</span><span>The app never joins networks for you and never sees your other Wi-Fi passwords.</span></li>
+    <li><span class="n">4</span><span>Back in the app, tap Worked or Didn't work. That single tap is the freshness engine.</span></li>
+    <li><span class="n">5</span><span>When failures pile up, the entry drops in score and goes back for review or an update from someone on the spot.</span></li>
+  </ol>
+
+  <p class="label">Member preview</p>
+  <div class="switchrow">
+    <button class="switch" id="memberSwitch" role="switch" aria-checked="false" aria-label="Preview as subscriber"><span class="thumb"></span></button>
+    <span id="memberState">Previewing as a guest - passwords hidden, Connect locked.</span>
+  </div>
+  <p class="caption">Demo only - no charge, no account. The toggle shows what the proposed membership (about HK$10 a month) would unlock. Demo state resets when you reload this page.</p>
+
+  <p class="label">The subscription, roughly</p>
+  <div class="facts">
+    <div class="frow"><div class="fl">Proposed price</div><div class="fv">About HK$10 per month - a hypothesis to test, not a set price. App Store prices come in fixed tiers, so the real price would be the nearest HK tier.</div></div>
+    <div class="frow"><div class="fl">Store economics</div><div class="fv">A digital subscription in an iPhone app generally must use Apple in-app purchase (App Store guideline 3.1.1, with regional exceptions elsewhere). Apple keeps roughly 15-30%, leaving about HK$7-8.50 per member at HK$10.</div></div>
+    <div class="frow"><div class="fl">Cost to start</div><div class="fv">Publishing any iPhone app needs an Apple Developer Program membership - about US$99 a year on Apple's published terms. Check the current fee before committing.</div></div>
+    <div class="frow"><div class="fl">Free tier</div><div class="fv">Scores, network names and open networks stay free, so non-paying users still feed reports and contributions.</div></div>
+    <div class="frow"><div class="fl">Reference point</div><div class="fv">WiFi Map's premium was about US$35 a year on its US App Store listing (HK pricing not checked). This club would compete on verified freshness in one city, not database size.</div></div>
+  </div>
+
+  <h2>Demo directory</h2>
+  <div id="directory"></div>
+  <p class="caption">All venues, networks and passwords on this page are synthetic demo records, not real credentials.</p>
+
+  <h2>Contribute an update</h2>
+  <form class="contrib" id="contribForm">
+    <label>Venue name<input id="fVenue" placeholder="e.g. Corner bakery, Sheung Wan"></label>
+    <label>Network name (SSID)<input id="fSsid" placeholder="e.g. Bakery_Guest"></label>
+    <label>Password, if it has one<input id="fPass" placeholder="Leave empty for open networks"></label>
+    <label>Note<input id="fNote" placeholder="e.g. staff confirmed it today"></label>
+    <button class="act" type="submit">Submit for review</button>
+  </form>
+  <div id="queue"></div>
+  <p class="caption">In this demo the queue stays in this page. In a real version a submission goes to a review queue, never straight into the directory.</p>
+
+  <h2>Tap-to-connect on a real iPhone</h2>
+  <div class="facts">
+    <div class="frow"><div class="fl">Finding the network</div><div class="fv">iOS gives apps no way to scan nearby Wi-Fi, so the venue comes from the app's own database by location - you tap the venue in the app, not the system Wi-Fi list.</div></div>
+    <div class="frow"><div class="fl">Joining</div><div class="fv">The app can ask iOS to join with the saved password (NEHotspotConfiguration). Apple documents that the device prompts you to approve adding the network, approval is not connection - the phone joins only if the network is found nearby, and even a successful join doesn't guarantee working internet.</div></div>
+    <div class="frow"><div class="fl">Sign-in pages</div><div class="fv">Networks with a captive portal (many lounges and hotels) still show their sign-in or terms page. Automatic portal login needs Apple's Hotspot Helper entitlement, granted case by case.</div></div>
+    <div class="frow"><div class="fl">Checking it worked</div><div class="fv">An app can read the joined network's name when it configured the join itself (or with precise location permission, VPN, or DNS configurations), then probe real internet. It cannot silently test a password in advance - your Worked tap stays the core signal.</div></div>
+  </div>
+
+  <h2>What a real version needs</h2>
+  <div class="facts">
+    <div class="frow"><div class="fl">What members pay for</div><div class="fv">Convenience, reliability and freshness, plus authorised connectivity. No ownership or resale claim over a venue's free Wi-Fi.</div></div>
+    <div class="frow"><div class="fl">Sourcing</div><div class="fv">Guest networks only, shared by visitors or confirmed by the venue itself. Private, home and staff networks are refused at submission.</div></div>
+    <div class="frow"><div class="fl">Access conditions</div><div class="fv">Knowing a password is not permission to use a network. Entries carry conditions like "customers only"; members-only lounge networks stay out unless the operator opts in.</div></div>
+    <div class="frow"><div class="fl">Moderation</div><div class="fv">Apple requires filtering, reporting and blocking for user-contributed content (App Store guideline 1.2), so review sits in front of publication.</div></div>
+    <div class="frow"><div class="fl">Security</div><div class="fv">Credentials stored encrypted, revealed only to members, and venues can claim their listing to rotate or retire details.</div></div>
+  </div>
+  <div class="callout"><b>The honest limit</b>A failed report can mean a changed password, a captive portal step, or a weak signal - the score treats them together and freshness dates keep that visible.</div>
+
+  <p class="closing">Prototype only - no real passwords, no charges, nothing connects from this page. Built 6 Nov 2026.</p>
+</div>
+<script>
+var venues = [
+  { id:'coastal', name:'Coastal Roast', area:'Sai Ying Pun', kind:'Cafe', ssid:'CoastalRoast_Guest', pass:'DEMO-flatwhite-88', access:'Customers', w:35, t:38, conf:'Confirmed 2 days ago', note:'' },
+  { id:'harbour', name:'Harbour Books', area:'Tsim Sha Tsui', kind:'Bookshop', ssid:'HB-Visitors', pass:null, access:'Anyone', w:22, t:25, conf:'Confirmed 5 days ago', note:'Open network with a captive portal - tap to agree, no password.' },
+  { id:'jade', name:'Jade Terrace Cafe', area:'Central', kind:'Cafe', ssid:'JadeTerrace', pass:'DEMO-jade-2026', access:'Customers', w:15, t:21, conf:'Confirmed 3 weeks ago', note:'Recent failures reported - an update request is open.' },
+  { id:'noodle', name:'Noodle Union', area:'Wan Chai', kind:'Restaurant', ssid:'NoodleUnion5G', pass:'DEMO-slurp-456', access:'Customers', w:7, t:13, conf:'Confirmed 2 months ago', note:'Score below the reliability floor - queued for re-verification.' }
+];
+var member = false;
+var reports = {};
+var simOpen = {};
+var statuses = {};
+
+function scoreOf(v){ var r=reports[v.id]||{w:0,f:0}; return Math.round(100*(v.w+r.w)/(v.t+r.w+r.f)); }
+function scoreClass(s){ return s>=80?'score good':(s>=60?'score mid':'score low'); }
+
+function render(){
+  var html='';
+  venues.forEach(function(v,i){
+    var r=reports[v.id]||{w:0,f:0};
+    var s=scoreOf(v);
+    var canConnect = v.pass===null || member;
+    var pw = v.pass===null ? 'Open - portal only' : (member ? v.pass : '\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022');
+    html += '<div class="venue">'
+      + '<div class="vtop"><div><div class="vname">'+(i+1)+'. '+v.name+'</div>'
+      + '<div class="vmeta">'+v.area+' \u00b7 '+v.kind+' \u00b7 '+v.access+' \u00b7 demo venue</div></div>'
+      + '<div class="'+scoreClass(s)+'">'+s+'%<small> worked</small></div></div>'
+      + '<div class="cred"><span class="cl">Network</span><span class="cv">'+v.ssid+'</span></div>'
+      + '<div class="cred"><span class="cl">Password</span><span class="cv">'+pw+'</span>'+((!member&&v.pass!==null)?'<span class="cn">Members only</span>':'')+'</div>'
+      + (v.note?'<div class="vnote">'+v.note+'</div>':'')
+      + '<div class="vmeta" style="margin-top:6px">'+v.conf+' \u00b7 '+(v.t+r.w+r.f)+' reports</div>'
+      + '<div class="btnrow">'
+      + '<button class="act" '+(canConnect?'':'disabled')+' onclick="toggleSim(\''+v.id+'\')">'+(simOpen[v.id]?'Hide simulation':(v.pass===null?'Join (demo)':'Connect (demo)'))+'</button>'
+      + '<button class="act sec" onclick="report(\''+v.id+'\',\'w\')">Worked</button>'
+      + '<button class="act sec" onclick="report(\''+v.id+'\',\'f\')">Didn\'t work</button>'
+      + '</div>';
+    if(simOpen[v.id]){
+      html += '<div class="sim">'+(v.pass===null
+        ? 'Simulated: your phone joins <b>'+v.ssid+'</b>, then the venue\'s sign-in page opens. That portal step stays manual - you agree to it yourself.'
+        : 'Simulated: the app asks iOS to join <b>'+v.ssid+'</b> with the saved password. iOS prompts you to approve the new network, approval is not connection - the phone joins only if the network is in range, and joining still doesn\'t guarantee working internet. The app can\'t scan for networks, so you picked the venue from this directory, not the Wi-Fi list.')
+        + ' <span class="vmeta">Then it asks: did it work?</span></div>';
+    }
+    if(statuses[v.id]){ html += '<div class="status">'+statuses[v.id]+'</div>'; }
+    html += '</div>';
+  });
+  document.getElementById('directory').innerHTML = html;
+}
+
+function toggleSim(id){ simOpen[id]=!simOpen[id]; render(); }
+function report(id,kind){
+  var r=reports[id]||{w:0,f:0};
+  if(kind==='w'){r.w++;statuses[id]='Thanks - counted as a success.';}
+  else{r.f++;statuses[id]='Counted as a failure - an update request opens for this entry.';}
+  reports[id]=r; render();
+}
+
+document.getElementById('memberSwitch').addEventListener('click', function(){
+  member=!member;
+  this.className='switch'+(member?' on':'');
+  this.setAttribute('aria-checked', member?'true':'false');
+  document.getElementById('memberState').textContent = member ? 'Previewing as a subscriber - passwords and Connect visible.' : 'Previewing as a guest - passwords hidden, Connect locked.';
+  render();
+});
+
+document.getElementById('contribForm').addEventListener('submit', function(e){
+  e.preventDefault();
+  var v=document.getElementById('fVenue').value.trim(), s=document.getElementById('fSsid').value.trim();
+  if(!v||!s) return;
+  var p=document.getElementById('fPass').value.trim();
+  var q=document.getElementById('queue');
+  var div=document.createElement('div');
+  div.className='qitem';
+  div.innerHTML='<div><span class="vname"></span> <span class="vmeta"></span></div><span class="chip">Pending review</span>';
+  div.querySelector('.vname').textContent=v;
+  div.querySelector('.vmeta').textContent=s+(p?' \u00b7 password supplied':' \u00b7 open network');
+  q.appendChild(div);
+  this.reset();
+});
+
+render();
+</script>
+</body>
+</html>
